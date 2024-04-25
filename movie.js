@@ -13,22 +13,23 @@ movieSearchBox.addEventListener("keyup", handKeyUp);
 const loadMovies = async () => {
   let searchTerm = movieSearchBox.value.trim();
   let URL = `http://www.omdbapi.com/?s=${searchTerm}&apikey=${API_KEY}`;
-  let result = await fetch(`${URL}`);
-  let data = await result.json();
-  if (data.Response === "True") {
+  try {
+    let result = await fetch(`${URL}`);
+    let data = await result.json();
     displayMovieList(data.Search);
-  } else {
-    window.removeEventListener("scroll", handleScroll);
+  } catch (error) {
+    console.error("Error", error);
   }
 };
 
 const displayMovieList = (movies) => {
   searchList.innerHTML = "";
   movies.forEach((movie) => {
-    searchList.innerHTML += `
-    <div class="search-short">
+    let movieElement = document.createElement("div");
+    movieElement.classList.add("search-short");
+    movieElement.innerHTML = `
       <div class="poster">
-        <img src="${movie.Poster}">
+        <img src="${movie.Poster !== "N/A" ? movie.Poster : "placeholder.jpg"}" alt="${movie.Title}">
       </div>
       <div class="desc">
         <div class="short">
@@ -39,7 +40,9 @@ const displayMovieList = (movies) => {
       </div>
     </div>
         `;
+    searchList.appendChild(movieElement);
   });
+
   document.querySelectorAll(".read-more").forEach((button) => {
     button.addEventListener("click", () => {
       const imdbID = button.dataset.imdbid;
@@ -50,9 +53,13 @@ const displayMovieList = (movies) => {
 
 const loadMovie = async (filmID) => {
   let URL = `http://www.omdbapi.com/?i=${filmID}&apikey=${API_KEY}`;
-  let result = await fetch(`${URL}`);
-  let data = await result.json();
-  displayPopUp(data);
+  try {
+    let result = await fetch(`${URL}`);
+    let data = await result.json();
+    displayPopUp(data);
+  } catch (error) {
+    console.error("Error", error);
+  }
 };
 
 const displayPopUp = (movie) => {
